@@ -14,6 +14,7 @@ namespace LocalAdjoints {
       Gradient& operator[](Identifier identifier);
       Gradient const& operator[](Identifier identifier) const;
       void resize(size_t size);
+      void clear();
   };
 
   /// Template for temporary mapped adjoint variables (underlying map to be specified).
@@ -31,6 +32,9 @@ namespace LocalAdjoints {
       }
 
       void resize(size_t) {}
+      void clear() {
+        map.clear();
+      }
   };
 
   /// Temporary mapped adjoint variables via std::map.
@@ -58,6 +62,10 @@ namespace LocalAdjoints {
       void resize(size_t size) {
         vector.resize(size);
       }
+
+      void clear() {
+        vector = std::vector<Gradient>();
+      }
   };
 
   /// Base class for persistent vector-based adjoint variables (underlying thread-local memory reused across instances).
@@ -69,6 +77,10 @@ namespace LocalAdjoints {
 
       void resize(size_t size) {
         vector->resize(size);
+      }
+
+      void clear() {
+        *vector = std::vector<Gradient>();
       }
   };
 
