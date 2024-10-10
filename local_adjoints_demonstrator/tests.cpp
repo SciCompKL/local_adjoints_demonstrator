@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "local_adjoints.hpp"
+#include "evaluation_strategies.hpp"
 #include "tape.hpp"
 
 /// Simple tests for the local adjoints demonstrator code.
@@ -30,55 +31,50 @@ int main(int argc, char** argv) {
   std::cout << std::endl;
 
   std::cout << "Evaluations with all adjoint variants." << std::endl;
-  {
-    LocalAdjoints::TemporaryMapStdMap<Identifier, Gradient> adjoints;
-    std::cout << std::setw(60) << "temporary map, std::map"
-              << std::setw(10) << tape->evaluate(adjoints, seed) << std::endl;
-  }
 
-  {
-    LocalAdjoints::TemporaryMapStdUnorderedMap<Identifier, Gradient> adjoints;
-    std::cout << std::setw(60) << "temporary map, std::unordered_map"
-              << std::setw(10) << tape->evaluate(adjoints, seed) << std::endl;
-  }
+  using EvaluationStrategy::Strategy;
 
-  {
-    LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
-    adjoints.resize(iMax + 1);
-    std::cout << std::setw(60) << "temporary vector"
-              << std::setw(10) << tape->evaluate(adjoints, seed) << std::endl;
-  }
+  std::cout << std::setw(60) << "temporary map, std::map"
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP>(*tape, seed)
+            << std::endl;
 
-  {
-    LocalAdjoints::PersistentVector<Identifier, Gradient> adjoints;
-    adjoints.resize(iMax + 1);
-    std::cout << std::setw(60) << "persistent vector"
-              << std::setw(10) << tape->evaluate(adjoints, seed) << std::endl;
-  }
+  std::cout << std::setw(60) << "temporary map, std::unordered_map"
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP>(*tape, seed)
+            << std::endl;
 
-  {
-    LocalAdjoints::PersistentVectorOffset<Identifier, Gradient> adjoints(iMin);
-    adjoints.resize(iMax - iMin + 1);
-    std::cout << std::setw(60) << "persistent vector with offset"
-              << std::setw(10) << tape->evaluate(adjoints, seed) << std::endl;
-  }
+  std::cout << std::setw(60) << "temporary vector"
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_VECTOR>(*tape, seed)
+            << std::endl;
+
+  std::cout << std::setw(60) << "persistent vector"
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR>(*tape, seed)
+            << std::endl;
+
+  std::cout << std::setw(60) << "persistent vector with offset"
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR_OFFSET>(*tape, seed)
+            << std::endl;
 
   {
     Tape<Identifier, Gradient> localTapeCopy(*tape);
-    localTapeCopy.remapIdentifiers<std::map<Identifier, Identifier>>();
-    LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
-    adjoints.resize(localTapeCopy.getMaxIdentifier() + 1);
     std::cout << std::setw(60) << "editing with std::map, temporary vector"
-              << std::setw(10) << localTapeCopy.evaluate(adjoints, seed) << std::endl;
+              << std::setw(10)
+              << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP_EDITING>(localTapeCopy,
+                                                                                                     seed)
+              << std::endl;
   }
 
   {
     Tape<Identifier, Gradient> localTapeCopy(*tape);
-    localTapeCopy.remapIdentifiers<std::unordered_map<Identifier, Identifier>>();
-    LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
-    adjoints.resize(localTapeCopy.getMaxIdentifier() + 1);
     std::cout << std::setw(60) << "editing with std::unordered_map, temporary vector"
-              << std::setw(10) << localTapeCopy.evaluate(adjoints, seed) << std::endl;
+              << std::setw(10)
+              << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP_EDITING>(
+                     localTapeCopy, seed)
+              << std::endl;
   }
 
   std::cout << std::endl;

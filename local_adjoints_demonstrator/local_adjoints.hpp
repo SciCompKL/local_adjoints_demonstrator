@@ -1,6 +1,5 @@
 #pragma once
 
-#include <omp.h>
 #include <map>
 #include <unordered_map>
 #include <vector>
@@ -76,7 +75,9 @@ namespace LocalAdjoints {
       #pragma omp threadprivate(vector)
 
       void resize(size_t size) {
-        vector->resize(size);
+        if (size > vector->size()) {
+          vector->resize(size);
+        }
       }
 
       void clear() {

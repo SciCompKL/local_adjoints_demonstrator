@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <random>
 #include <vector>
@@ -20,6 +21,7 @@ struct Tape {
   public:
     std::vector<Identifier> identifiers;  /// virtual memory addresses to access
     std::vector<Gradient> jacobians;      /// partials to multiply
+    bool remapped;                        /// indicator to avoid multiple remappings
 
     /// Performs the tape evaluation on the given adjoint variables with the given seed.
     /// Reads and writes each adjoint memory location exactly once.
@@ -43,24 +45,36 @@ struct Tape {
     /// Edit the tape and remap identifiers to a contiguous range.
     template<typename Map>
     void remapIdentifiers() {
-      Identifier nextIdentifier = 1;
-      Map identifierMap;
+      if (!remapped) {
+        Identifier nextIdentifier = 1;
+        Map identifierMap;
 
-      for (auto& identifier : identifiers) {
-        auto result = identifierMap.insert({identifier, nextIdentifier});
-        if (result.second) {  // insertion was performed, increment identifier
-          nextIdentifier++;
+        for (auto& identifier : identifiers) {
+          auto result = identifierMap.insert({identifier, nextIdentifier});
+          if (result.second) {  // insertion was performed, increment identifier
+            nextIdentifier++;
+          }
+          identifier = result.first->second;
         }
-        identifier = result.first->second;
+
+        remapped = true;
       }
     }
 
     Identifier getMaxIdentifier() {
-      Identifier currentMax = 0;
+      Identifier currentMax = std::numeric_limits<Identifier>::min();
       for (auto const& identifier : identifiers) {
         currentMax = std::max(currentMax, identifier);
       }
       return currentMax;
+    }
+
+    Identifier getMinIdentifier() {
+      Identifier currentMin = std::numeric_limits<Identifier>::max();
+      for (auto const& identifier : identifiers) {
+        currentMin = std::min(currentMin, identifier);
+      }
+      return currentMin;
     }
 
     /// Generate a tape of a given size, drawing random identifiers uniformly from the specified range.
@@ -85,6 +99,7 @@ struct Tape {
 
     /// Tape printing for debugging purposes.
     void print() {
+      std::cout << "  remapped: " << remapped << std::endl;
       for (size_t i = 0; i < identifiers.size(); ++i) {
         std::cout << std::setw(10) << identifiers[i] << " " << jacobians[i] << std::endl;
       }
