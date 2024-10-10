@@ -1,7 +1,8 @@
 #include <iostream>
 
-#include "local_adjoints.hpp"
 #include "evaluation_strategies.hpp"
+#include "local_adjoints.hpp"
+#include "preaccumulations.hpp"
 #include "tape.hpp"
 
 /// Simple tests for the local adjoints demonstrator code.
@@ -9,9 +10,9 @@ int main(int argc, char** argv) {
   using Identifier = int;
   using Gradient = double;
 
-  int const size = 10;
-  int const iMin = 20;
-  int const iMax = 80;
+  size_t const size = 10;
+  int iMin = 20;
+  int iMax = 80;
   double seed = 1.0;
 
   size_t randomSeed = 42;
@@ -83,6 +84,20 @@ int main(int argc, char** argv) {
   tape->remapIdentifiers<std::map<Identifier, Identifier>>();
   tape->print();
   std::cout << std::endl;
+
+  std::cout << "Simultaneous preaccumulations." << std::endl;
+
+  size_t const nPreaccs = 10000;
+  size_t const preaccSizeMin = 80;
+  size_t const preaccSizeMax = 120;
+  size_t const nEvalMin = 1;
+  size_t const nEvalMax = 10;
+  iMin = 1;
+  iMax = 1000;
+
+  Preaccumulations<Identifier, Gradient> preaccs(nPreaccs, preaccSizeMin, preaccSizeMax, nEvalMin, nEvalMax, iMin, iMax,
+                                                 randomSeed);
+  std::cout << std::setw(10) << preaccs.run<Strategy::PERSISTENT_VECTOR>(1.0) << std::endl << std::endl;
 
   return 0;
 }
