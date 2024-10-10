@@ -48,8 +48,8 @@ struct Tape {
 
       for (auto& identifier : identifiers) {
         auto result = identifierMap.insert({identifier, nextIdentifier});
-        if (result.second) {  // insertion was performed, assign and increment identifier
-          result.first->second = nextIdentifier++;
+        if (result.second) {  // insertion was performed, increment identifier
+          nextIdentifier++;
         }
         identifier = result.first->second;
       }
@@ -65,11 +65,11 @@ struct Tape {
 
     /// Generate a tape of a given size, drawing random identifiers uniformly from the specified range.
     /// Produces Jacobians in a neighborhood of 1.0.
-    static std::shared_ptr<Tape> generate(size_t size, Identifier iMin, Identifier iMax) {
+    /// Deterministic with respect to the specified seed.
+    static std::shared_ptr<Tape> generate(size_t size, Identifier iMin, Identifier iMax, size_t randomSeed) {
       std::shared_ptr<Tape> result(new Tape);
 
-      std::random_device rd;
-      std::mt19937 generator(rd());
+      std::mt19937 generator(randomSeed);
       std::uniform_int_distribution<Identifier> distribution(iMin, iMax);
 
       result->identifiers.resize(size);

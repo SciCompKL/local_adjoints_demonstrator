@@ -3,7 +3,8 @@
 #include "local_adjoints.hpp"
 #include "tape.hpp"
 
-int main() {
+/// Simple tests for the local adjoints demonstrator code.
+int main(int argc, char** argv) {
   using Identifier = int;
   using Gradient = double;
 
@@ -12,7 +13,12 @@ int main() {
   int const iMax = 80;
   double seed = 1.0;
 
-  auto tape = Tape<Identifier, Gradient>::generate(size, iMin, iMax);
+  size_t randomSeed = 42;
+  if (argc > 1) {
+    randomSeed = std::stol(argv[1]);
+  }
+
+  auto tape = Tape<Identifier, Gradient>::generate(size, iMin, iMax, randomSeed);
 
   std::cout << "Example tape." << std::endl;
   tape->print();
