@@ -1,9 +1,18 @@
 #include <iostream>
+#include <string>
 
 #include "evaluation_strategies.hpp"
 #include "local_adjoints.hpp"
 #include "preaccumulations.hpp"
 #include "tape.hpp"
+
+template<typename Identifier, typename Gradient, EvaluationStrategy::Strategy strategy>
+void testStrategy(std::string const& name, Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+  std::cout << std::setw(60) << name
+            << std::setw(10)
+            << EvaluationStrategy::evaluate<Identifier, Gradient, strategy>(tape, seed)
+            << std::endl;
+}
 
 /// Simple tests for the local adjoints demonstrator code.
 int main(int argc, char** argv) {
@@ -35,48 +44,21 @@ int main(int argc, char** argv) {
 
   using EvaluationStrategy::Strategy;
 
-  std::cout << std::setw(60) << "temporary map, std::map"
-            << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP>(*tape, seed)
-            << std::endl;
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_MAP>("temporary map, std::map", *tape, seed);
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP>("temporary map, std::unordered_map", *tape,
+                                                                        seed);
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_VECTOR>("temporary vector", *tape, seed);
+  testStrategy<Identifier, Gradient, Strategy::PERSISTENT_VECTOR>("persistent vector", *tape, seed);
+  testStrategy<Identifier, Gradient, Strategy::PERSISTENT_VECTOR_OFFSET>("persistent vector with offset", *tape, seed);
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_MAP>("temporary map, std::map", *tape, seed);
 
-  std::cout << std::setw(60) << "temporary map, std::unordered_map"
-            << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP>(*tape, seed)
-            << std::endl;
+  Tape<Identifier, Gradient> localTapeCopy = *tape;
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_MAP_EDITING>("editing with std::map, temporary vector",
+                                                                      localTapeCopy, seed);
 
-  std::cout << std::setw(60) << "temporary vector"
-            << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_VECTOR>(*tape, seed)
-            << std::endl;
-
-  std::cout << std::setw(60) << "persistent vector"
-            << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR>(*tape, seed)
-            << std::endl;
-
-  std::cout << std::setw(60) << "persistent vector with offset"
-            << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR_OFFSET>(*tape, seed)
-            << std::endl;
-
-  {
-    Tape<Identifier, Gradient> localTapeCopy(*tape);
-    std::cout << std::setw(60) << "editing with std::map, temporary vector"
-              << std::setw(10)
-              << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP_EDITING>(localTapeCopy,
-                                                                                                     seed)
-              << std::endl;
-  }
-
-  {
-    Tape<Identifier, Gradient> localTapeCopy(*tape);
-    std::cout << std::setw(60) << "editing with std::unordered_map, temporary vector"
-              << std::setw(10)
-              << EvaluationStrategy::evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP_EDITING>(
-                     localTapeCopy, seed)
-              << std::endl;
-  }
+  localTapeCopy = *tape;
+  testStrategy<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP_EDITING>(
+      "editing with std::unordered_map, temporary vector", localTapeCopy, seed);
 
   std::cout << std::endl;
 
