@@ -22,7 +22,7 @@ struct Preaccumulations {
                      Identifier iMin, Identifier iMax, size_t randomSeed)
         : nPreaccs(nPreaccs), preaccSizeMin(preaccSizeMin), preaccSizeMax(preaccSizeMax), nEvalMin(nEvalMin),
           nEvalMax(nEvalMax), iMin(iMin), iMax(iMax), randomSeed(randomSeed) {
-      // precompute individual random seeds for the individual preaccumulations
+      // precompute individual random seeds for the individual preaccumulations (deterministic w.r.t. randomSeed)
       std::mt19937 generator(randomSeed);
       preaccumulationSeeds.resize(nPreaccs);
       for (auto& seed : preaccumulationSeeds) {
@@ -33,7 +33,7 @@ struct Preaccumulations {
     /// Run simultaneous preaccumulations with the specified evaluation strategy.
     template<EvaluationStrategy::Strategy evaluationStrategy>
     Gradient run(Gradient const& seed) {
-      Gradient result = 1.0;
+      Gradient result = 0.0;
 
       #pragma omp parallel
       {

@@ -114,11 +114,11 @@ namespace LocalAdjoints {
       PersistentVectorOffset(Identifier offset) : offset(offset) {}
 
       Gradient& operator[](Identifier identifier) {
-        return Base::vector->operator [](identifier);
+        return Base::vector->operator [](identifier - offset);
       }
 
       Gradient const& operator[](Identifier identifier) const {
-        return Base::vector->operator [](identifier);
+        return Base::vector->operator [](identifier - offset);
       }
   };
 }

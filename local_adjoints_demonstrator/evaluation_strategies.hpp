@@ -118,7 +118,7 @@ namespace EvaluationStrategy {
     struct ClearAdjoints<Identifier, Gradient, Strategy::PERSISTENT_VECTOR_OFFSET>  {
       public:
         static void clearAdjoints() {
-          LocalAdjoints::PersistentVectorOffset<Identifier, Gradient> adjoints;
+          LocalAdjoints::PersistentVectorOffset<Identifier, Gradient> adjoints(0);
           adjoints.clear();
         }
     };
