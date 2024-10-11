@@ -26,11 +26,11 @@ std::ostream& operator<<(std::ostream& out, PerformanceData<Gradient> const& dat
   out << std::setw(5) << data.nThreads
       << std::setw(5) << data.nWarmups
       << std::setw(5) << data.nRuns
-      << std::setw(10) << data.runtimeAvg
-      << std::setw(10) << data.runtimeMin
-      << std::setw(10) << data.runtimeMax
-      << std::setw(10) << data.memoryHwm
-      << std::setw(10) << data.result;
+      << std::setw(16) << data.runtimeAvg
+      << std::setw(16) << data.runtimeMin
+      << std::setw(16) << data.runtimeMax
+      << std::setw(16) << data.memoryHwm
+      << std::setw(16) << data.result;
   return out;
 }
 

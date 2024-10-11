@@ -105,7 +105,10 @@ int main(int argc, char** argv) {
 
   std::cout << "Benchmarking simultaneous preaccumulations." << std::endl;
 
-  Benchmark<Identifier, Gradient> benchmark(1, 3);
+  size_t const nWarmups = 1;
+  size_t const nRuns = 3;
+
+  Benchmark<Identifier, Gradient> benchmark(nWarmups, nRuns);
 
   /// note that memory high water marks are not representative as all tests run in the same executable
   testBenchmark<Identifier, Gradient, Strategy::TEMPORARY_MAP>("temporary map, std::map", benchmark, preaccs);

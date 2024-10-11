@@ -23,6 +23,8 @@ struct Tape {
     std::vector<Gradient> jacobians;      /// partials to multiply
     bool remapped;                        /// indicator to avoid multiple remappings
 
+    Tape() : identifiers(), jacobians(), remapped(false) {}
+
     /// Performs the tape evaluation on the given adjoint variables with the given seed.
     /// Reads and writes each adjoint memory location exactly once.
     /// Auto-zeroes adjoint variables.
