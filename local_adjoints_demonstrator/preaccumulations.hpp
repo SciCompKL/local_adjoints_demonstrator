@@ -16,19 +16,11 @@ struct Preaccumulations {
     Identifier iMin;
     Identifier iMax;
     size_t randomSeed;
-    std::vector<size_t> preaccumulationSeeds;
 
     Preaccumulations(size_t nPreaccs, size_t preaccSizeMin, size_t preaccSizeMax, size_t nEvalMin, size_t nEvalMax,
                      Identifier iMin, Identifier iMax, size_t randomSeed)
         : nPreaccs(nPreaccs), preaccSizeMin(preaccSizeMin), preaccSizeMax(preaccSizeMax), nEvalMin(nEvalMin),
-          nEvalMax(nEvalMax), iMin(iMin), iMax(iMax), randomSeed(randomSeed) {
-      // precompute individual random seeds for the individual preaccumulations (deterministic w.r.t. randomSeed)
-      std::mt19937 generator(randomSeed);
-      preaccumulationSeeds.resize(nPreaccs);
-      for (auto& seed : preaccumulationSeeds) {
-        seed = generator();
-      }
-    }
+          nEvalMax(nEvalMax), iMin(iMin), iMax(iMax), randomSeed(randomSeed) {}
 
     /// Run simultaneous preaccumulations with the specified evaluation strategy.
     template<EvaluationStrategy::Strategy evaluationStrategy>
@@ -39,11 +31,14 @@ struct Preaccumulations {
       {
         #pragma omp for reduction(+:result)
         for (size_t i = 0; i < nPreaccs; ++i) {
+          // produce a random seed specific to this preaccumulation
+          std::mt19937 preaccSeedGenerator(randomSeed + i);
+          size_t preaccSeed = preaccSeedGenerator();
+
           // generate a tape, mimicking the preaccumulation-associated recording
-          std::mt19937 generator(preaccumulationSeeds[i]);
+          std::mt19937 generator(preaccSeed);
           std::uniform_int_distribution<size_t> preaccSizeDistribution(preaccSizeMin, preaccSizeMax);
-          auto tape = Tape<Identifier, Gradient>::generate(preaccSizeDistribution(generator), iMin, iMax,
-                                                           preaccumulationSeeds[i]);
+          auto tape = Tape<Identifier, Gradient>::generate(preaccSizeDistribution(generator), iMin, iMax, preaccSeed);
 
           // evaluate the tape, possibly multiple times to emulate multiple preaccumulation inputs/outputs
           std::uniform_int_distribution<size_t> nEvalDistribution(nEvalMin, nEvalMax);
