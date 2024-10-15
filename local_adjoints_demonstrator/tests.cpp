@@ -10,7 +10,7 @@
 template<typename Identifier, typename Gradient, EvaluationStrategy::Strategy strategy>
 void testEvaluation(std::string const& name, Tape<Identifier, Gradient>& tape, Gradient const& seed) {
   std::cout << std::setw(60) << name << std::setw(10)
-            << EvaluationStrategy::evaluate<Identifier, Gradient, strategy>(tape, seed) << std::endl;
+            << EvaluationStrategy::evaluate<Identifier, Gradient, strategy>(tape, {seed}) << std::endl;
 }
 
 template<typename Identifier, typename Gradient, EvaluationStrategy::Strategy strategy>

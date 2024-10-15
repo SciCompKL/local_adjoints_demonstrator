@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+
 #include "local_adjoints.hpp"
 #include "tape.hpp"
 
@@ -18,88 +20,116 @@ namespace EvaluationStrategy {
   };
 
   namespace Implementation {
-    /// Implement evaluation of a given tape with the specified evaluation strategy, specialized for each strategy.
+    /// Implement evaluations of a given tape with the specified evaluation strategy, specialized for each strategy.
     template<typename Identifier, typename Gradient, Strategy evaluationStrategy>
     struct Evaluate {
       public:
-        // static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {}
+        // static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {}
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::TEMPORARY_VECTOR> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
           LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
           adjoints.resize(tape.getMaxIdentifier() + 1);
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
           LocalAdjoints::PersistentVector<Identifier, Gradient> adjoints;
           adjoints.resize(tape.getMaxIdentifier() + 1);
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::PERSISTENT_VECTOR_OFFSET> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
           LocalAdjoints::PersistentVectorOffset<Identifier, Gradient> adjoints(tape.getMinIdentifier());
           adjoints.resize(tape.getMaxIdentifier() - tape.getMinIdentifier() + 1);
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
           LocalAdjoints::TemporaryMapStdMap<Identifier, Gradient> adjoints;
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
           LocalAdjoints::TemporaryMapStdUnorderedMap<Identifier, Gradient> adjoints;
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::TEMPORARY_MAP_EDITING> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
-          tape.template remapIdentifiers<std::map<Identifier, Identifier>>();  // only remaps on first call
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
+          tape.template remapIdentifiers<std::map<Identifier, Identifier>>();
           LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
           adjoints.resize(tape.getMaxIdentifier() + 1);
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
 
     template<typename Identifier, typename Gradient>
     struct Evaluate<Identifier, Gradient, Strategy::TEMPORARY_UNORDERED_MAP_EDITING> {
       public:
-        static Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
-          tape.template remapIdentifiers<std::unordered_map<Identifier, Identifier>>();  // only remaps on first call
+        static Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
+          tape.template remapIdentifiers<std::unordered_map<Identifier, Identifier>>();
           LocalAdjoints::TemporaryVector<Identifier, Gradient> adjoints;
           adjoints.resize(tape.getMaxIdentifier() + 1);
-          return tape.evaluate(adjoints, seed);
+          Gradient result = 0.0;
+          for (auto const& seed : seeds) {
+            result += tape.evaluate(adjoints, seed);
+          }
+          return result;
         }
     };
   }
 
-  /// Evaluate a given tape with the specified evaluation strategy, specialized for the strategies.
+  /// Evaluate a given tape, possibly multiple times, with the specified evaluation strategy and the given seeds.
   template<typename Identifier, typename Gradient, Strategy evaluationStrategy>
-  Gradient evaluate(Tape<Identifier, Gradient>& tape, Gradient const& seed) {
-    return Implementation::Evaluate<Identifier, Gradient, evaluationStrategy>::evaluate(tape, seed);
+  Gradient evaluate(Tape<Identifier, Gradient>& tape, std::list<Gradient> const& seeds) {
+    return Implementation::Evaluate<Identifier, Gradient, evaluationStrategy>::evaluate(tape, seeds);
   }
 
   namespace Implementation {

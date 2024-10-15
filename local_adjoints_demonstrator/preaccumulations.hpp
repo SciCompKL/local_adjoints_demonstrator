@@ -43,9 +43,11 @@ struct Preaccumulations {
           // evaluate the tape, possibly multiple times to emulate multiple preaccumulation inputs/outputs
           std::uniform_int_distribution<size_t> nEvalDistribution(nEvalMin, nEvalMax);
           size_t nEval = nEvalDistribution(generator);
+          std::list<Gradient> seeds;
           for (size_t i = 0; i < nEval; ++i) {
-            result += EvaluationStrategy::evaluate<Identifier, Gradient, evaluationStrategy>(*tape, seed + 0.1 * std::sin(i));
+            seeds.push_back(seed + 0.1 * std::sin(i));
           }
+          result += EvaluationStrategy::evaluate<Identifier, Gradient, evaluationStrategy>(*tape, seeds);
         }
 
         EvaluationStrategy::clearAdjoints<Identifier, Gradient, evaluationStrategy>();
