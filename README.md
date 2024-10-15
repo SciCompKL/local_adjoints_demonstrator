@@ -1,12 +1,12 @@
 ## Local Adjoints Demonstrator
 
-This is a minimal implementation of simultaneous preaccumulations with local adjoints to support the paper [Local Adjoints for Simultaneous Preaccumulations with Shared Inputs](https://arxiv.org/abs/2405.07819). It can be used to quickly explore and assess different storage strategies for local adjoint variables.
+This demonstrator code supports the paper [Local Adjoints for Simultaneous Preaccumulations with Shared Inputs](https://arxiv.org/abs/2405.07819). It can be used to quickly explore and assess different storage strategies for local adjoint variables.
 
-- According to user-provided parameters, generate synthetic preaccumulation workloads.
-- Execute the preaccumulation workloads concurrently, with options to use different strategies for local adjoint variables.
+- According to user-provided parameters, generate synthetic preaccumulation-like workloads.
+- Execute the workloads concurrently, with options to use different strategies for local adjoint variables.
 - Benchmark the memory and runtime performance.
 
-The synthetically generated preaccumulation workloads resemble what a Jacobian taping approach would record for single-input single-output chains of unary operations. A single work item consists of one such chain and the number of times it should be evaluated, emulating preaccumulations with multiple inputs and outputs. Parallel execution corresponds to distributing these work items to threads in an OpenMP worksharing loop.
+While the code neither implements nor uses actual automatic differentiation, the synthetically generated preaccumulation workloads resemble what a Jacobian taping approach would record and evaluate for single-input single-output chains of unary operations. A single work item consists of one such chain and the number of times it should be evaluated, emulating preaccumulations with multiple inputs and outputs. Parallel execution corresponds to distributing these work items to threads in an OpenMP worksharing loop.
 
 ## Build 
 
