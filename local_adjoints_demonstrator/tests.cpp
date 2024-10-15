@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
   std::cout << "Simultaneous preaccumulations." << std::endl;
 
   size_t const nPreaccs = 10000;
-  size_t const preaccSizeMin = 8000;
-  size_t const preaccSizeMax = 12000;
+  size_t const preaccSizeMin = 80;
+  size_t const preaccSizeMax = 120;
   size_t const nEvalMin = 1;
   size_t const nEvalMax = 10;
   iMin = 1;
