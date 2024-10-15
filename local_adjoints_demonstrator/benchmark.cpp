@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
     std::cout << "  6: editing with std::unordered_map, temporary vector" << std::endl;
     std::cout << "randomSeed: specify a random seed, defaults to 42, generated workload is deterministic w.r.t. this seed"
               << std::endl << std::endl;
-    std::cout << "Output: [number of threads] [nWarmups] [nRuns] [average time] [minimum time] [maximum time]"
-              << " [memory hwm] [checksum]" << std::endl << std::endl;
+    std::cout << "Output: [strategy] [number of threads] [nWarmups] [nRuns] [average time] [minimum time] "
+                 "[maximum time] [memory hwm] [checksum]" << std::endl << std::endl;
     std::cout << "Set number of threads by setting OMP_NUM_THREADS." << std::endl;
     return 1;
   }
@@ -58,6 +58,7 @@ int main(int argc, char** argv) {
 
   Benchmark<Identifier, Gradient> benchmark(nWarmups, nRuns);
 
+  std::cout << std::setw(5) << strategy;
   switch (strategy) {
     case 0:
       std::cout << benchmark.run<Strategy::TEMPORARY_VECTOR>(preaccs) << std::endl;
