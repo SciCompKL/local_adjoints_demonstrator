@@ -35,7 +35,7 @@ The `benchmark` executable takes the following mandatory positional arguments.
 | 9 | number of measured benchmark runs |
 | 10 | integer that identifies the strategy for local adjoint variables |
 
-Actual preaccumulation sizes, numbers of evaluations, and identifiers are drawn from a uniform distribution on integers between the respective lower and upper bounds. Each run performs the entire preaccumulation workload, but only benchmark runs contribute to the measurements.
+Actual preaccumulation sizes, numbers of evaluations, and identifiers are drawn from a uniform distribution on integers between the respective lower and upper bounds. Each run performs the entire preaccumulation workload, but only benchmark runs contribute to the time measurements.
 
 The following strategies are implemented. Please refer to the paper for detailed explanations.
 

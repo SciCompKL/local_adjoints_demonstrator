@@ -16,3 +16,4 @@ benchmark: headers
 .PHONY: clean
 clean:
 	rm -f tests
+	rm -f benchmark
